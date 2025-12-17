@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KYoutube - 나만의 유튜브 뷰어</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <header>
+            <h1>📺 KYoutube</h1>
+            <p>케이블 TV처럼 채널을 선택하세요</p>
+        </header>
+
+        <!-- 채널 추가 섹션 -->
+        <section class="add-channel-section">
+            <button id="toggleAddChannel" class="add-channel-toggle">➕ 채널 추가</button>
+            <div id="addChannelForm" class="add-channel-form" style="display: none;">
+                <input type="text" id="searchInput" placeholder="채널 이름 검색 (예: 김줄스, 백종원)" class="search-input">
+                <button id="searchButton" class="search-button">검색</button>
+                <div id="searchResults" class="search-results">
+                    <!-- 검색 결과가 여기에 표시됨 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 채널 선택 리모컨 -->
+        <section class="channel-selector">
+            <h2>채널 목록</h2>
+            <div id="channelList" class="channel-grid">
+                <!-- JavaScript로 동적 생성 -->
+            </div>
+        </section>
+
+        <!-- 현재 선택된 채널 정보 -->
+        <section id="currentChannel" class="current-channel" style="display: none;">
+            <div class="channel-info">
+                <h2 id="channelName">채널 이름</h2>
+                <p id="channelDescription">채널 설명</p>
+            </div>
+        </section>
+
+        <!-- 동영상 목록 -->
+        <section id="videoSection" class="video-section" style="display: none;">
+            <h2>최신 동영상</h2>
+            <div id="videoList" class="video-grid">
+                <!-- JavaScript로 동적 생성 -->
+            </div>
+        </section>
+
+        <!-- 동영상 플레이어 -->
+        <section id="playerSection" class="player-section" style="display: none;">
+            <button id="backToVideos" class="back-button">← 동영상 목록으로</button>
+            <div id="player"></div>
+            <div id="videoInfo" class="video-info">
+                <h3 id="videoTitle"></h3>
+                <p id="videoDescription"></p>
+            </div>
+        </section>
+    </div>
+
+    <!-- YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="app.js"></script>
+</body>
+</html>
