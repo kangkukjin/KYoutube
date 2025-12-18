@@ -20,17 +20,17 @@ body {
 header {
     text-align: center;
     color: white;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
 }
 
 header h1 {
-    font-size: 3em;
+    font-size: 2.5em;
     margin-bottom: 10px;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 }
 
 header p {
-    font-size: 1.2em;
+    font-size: 1.1em;
     opacity: 0.9;
 }
 
@@ -40,17 +40,17 @@ header p {
     padding: 20px;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 .add-channel-toggle {
     background: #4caf50;
     color: white;
     border: none;
-    padding: 15px 30px;
+    padding: 12px 25px;
     border-radius: 10px;
     cursor: pointer;
-    font-size: 1.1em;
+    font-size: 1em;
     font-weight: bold;
     transition: background 0.2s;
 }
@@ -63,17 +63,31 @@ header p {
     margin-top: 20px;
 }
 
-.search-input {
-    width: calc(100% - 120px);
+.form-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.category-select {
     padding: 12px;
     border: 2px solid #ddd;
     border-radius: 5px;
     font-size: 1em;
-    margin-right: 10px;
+    min-width: 150px;
+}
+
+.search-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 1em;
 }
 
 .search-button {
-    padding: 12px 30px;
+    padding: 12px 25px;
     background: #667eea;
     color: white;
     border: none;
@@ -98,17 +112,11 @@ header p {
     background: #f8f9fa;
     border-radius: 10px;
     margin-bottom: 10px;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.search-result-item:hover {
-    background: #e9ecef;
 }
 
 .search-result-thumbnail {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     margin-right: 15px;
 }
@@ -136,7 +144,7 @@ header p {
     background: #4caf50;
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: 8px 16px;
     border-radius: 5px;
     cursor: pointer;
     font-weight: bold;
@@ -152,95 +160,64 @@ header p {
     cursor: not-allowed;
 }
 
-/* 채널 선택 섹션 */
-.channel-selector {
+/* 카테고리 섹션 */
+.category-section {
     background: white;
-    padding: 30px;
+    padding: 20px;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    margin-bottom: 30px;
-}
-
-.channel-selector h2 {
     margin-bottom: 20px;
-    color: #667eea;
 }
 
-.channel-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
-    max-height: 400px;
+.category-list {
+    max-height: 500px;
     overflow-y: auto;
-    padding-right: 10px;
 }
 
-/* 스크롤바 스타일링 */
-.channel-grid::-webkit-scrollbar {
-    width: 8px;
+.category-item {
+    margin-bottom: 5px;
 }
 
-.channel-grid::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
-
-.channel-grid::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 10px;
-}
-
-.channel-grid::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
-
-.channel-button {
+.category-header {
+    display: flex;
+    align-items: center;
+    padding: 15px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    border: none;
-    padding: 30px 20px;
     border-radius: 10px;
     cursor: pointer;
-    font-size: 1.1em;
-    font-weight: bold;
     transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    width: 100%;
-    height: 100%;
-    min-height: 120px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.channel-button:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0,0,0,0.2);
-}
-
-.channel-button .channel-number {
-    display: block;
-    font-size: 2em;
-    margin-bottom: 10px;
-}
-
-.channel-button .channel-name {
-    display: block;
-    font-size: 0.9em;
-    opacity: 0.9;
-}
-
-.channel-button-wrapper {
     position: relative;
-    min-height: 120px;
 }
 
-.delete-channel {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: rgba(244, 67, 54, 0.9);
+.category-header:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.category-header.open {
+    border-radius: 10px 10px 0 0;
+}
+
+.category-toggle {
+    margin-right: 10px;
+    font-size: 0.8em;
+}
+
+.category-name {
+    font-weight: bold;
+    font-size: 1.1em;
+    flex: 1;
+}
+
+.category-count {
+    opacity: 0.8;
+    font-size: 0.9em;
+    margin-right: 10px;
+}
+
+.delete-category {
+    background: rgba(255,255,255,0.2);
     color: white;
     border: none;
     width: 25px;
@@ -251,15 +228,60 @@ header p {
     display: none;
     align-items: center;
     justify-content: center;
-    z-index: 10;
 }
 
-.channel-button-wrapper:hover .delete-channel {
+.category-header:hover .delete-category {
     display: flex;
 }
 
-.delete-channel:hover {
-    background: rgba(211, 47, 47, 1);
+.delete-category:hover {
+    background: rgba(244, 67, 54, 0.8);
+}
+
+.category-channels {
+    background: #f8f9fa;
+    border-radius: 0 0 10px 10px;
+    padding: 10px;
+}
+
+.channel-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background: white;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.channel-item:hover {
+    background: #e9ecef;
+    transform: translateX(5px);
+}
+
+.channel-item .channel-name {
+    flex: 1;
+    font-size: 0.95em;
+}
+
+.channel-item .delete-channel {
+    background: transparent;
+    color: #999;
+    border: none;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    font-size: 0.8em;
+    display: none;
+}
+
+.channel-item:hover .delete-channel {
+    display: block;
+}
+
+.channel-item .delete-channel:hover {
+    color: #f44336;
 }
 
 /* 현재 채널 정보 */
@@ -268,7 +290,7 @@ header p {
     padding: 20px;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 .channel-info h2 {
@@ -279,9 +301,10 @@ header p {
 /* 동영상 섹션 */
 .video-section {
     background: white;
-    padding: 30px;
+    padding: 25px;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    margin-bottom: 20px;
 }
 
 .video-section h2 {
@@ -291,7 +314,7 @@ header p {
 
 .video-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
 }
 
@@ -322,7 +345,7 @@ header p {
 .video-card-title {
     font-weight: bold;
     margin-bottom: 8px;
-    font-size: 1em;
+    font-size: 0.95em;
     color: #333;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -338,7 +361,7 @@ header p {
 /* 플레이어 섹션 */
 .player-section {
     background: white;
-    padding: 30px;
+    padding: 25px;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
@@ -373,7 +396,7 @@ header p {
 .video-info h3 {
     color: #667eea;
     margin-bottom: 10px;
-    font-size: 1.5em;
+    font-size: 1.3em;
 }
 
 .video-info p {
@@ -381,28 +404,50 @@ header p {
     line-height: 1.6;
 }
 
+/* 스크롤바 스타일링 */
+.category-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.category-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.category-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.category-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
 /* 반응형 디자인 */
 @media (max-width: 768px) {
     header h1 {
-        font-size: 2em;
+        font-size: 1.8em;
     }
 
-    .channel-grid {
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-        gap: 10px;
+    .form-row {
+        flex-direction: column;
     }
 
-    .channel-button {
-        padding: 20px 10px;
-        font-size: 0.9em;
-    }
-
-    .channel-button .channel-number {
-        font-size: 1.5em;
+    .category-select,
+    .search-input {
+        width: 100%;
     }
 
     .video-grid {
         grid-template-columns: 1fr;
+    }
+
+    .category-header {
+        padding: 12px;
+    }
+
+    .category-name {
+        font-size: 1em;
     }
 }
 
@@ -411,5 +456,5 @@ header p {
     text-align: center;
     padding: 40px;
     color: #667eea;
-    font-size: 1.2em;
+    font-size: 1.1em;
 }

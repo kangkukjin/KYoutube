@@ -1,5 +1,5 @@
 // 전역 변수
-let channels = [];
+let categoryData = { categories: [] };  // 카테고리별 채널 데이터
 let currentChannel = null;
 let player = null;
 let currentVideos = [];
@@ -12,32 +12,44 @@ function onYouTubeIframeAPIReady() {
 // 초기화
 async function init() {
     try {
-        loadChannelsFromStorage();
-        renderChannelList();
+        await loadChannels();
+        renderCategoryList();
         setupEventListeners();
+        populateCategorySelect();
     } catch (error) {
         console.error('Initialization error:', error);
         alert('초기화 중 오류가 발생했습니다.');
     }
 }
 
-// localStorage에서 채널 불러오기
-function loadChannelsFromStorage() {
-    const saved = localStorage.getItem('kyoutube_channels');
-    if (saved) {
-        channels = JSON.parse(saved);
-    } else {
-        // 기본 채널
-        channels = [
-            { id: 1, name: '김줄스', channelId: 'UCPTM-NMXolwmnUE_rjFIoYQ' }
-        ];
-        saveChannelsToStorage();
+// 채널 불러오기
+async function loadChannels() {
+    // 1. localStorage에서 사용자 데이터 불러오기
+    const savedData = localStorage.getItem('kyoutube_category_data');
+    
+    if (savedData) {
+        categoryData = JSON.parse(savedData);
+        console.log('✅ localStorage에서 데이터 로드됨');
+        return;
+    }
+    
+    // 2. localStorage에 없으면 channels.json에서 기본 데이터 불러오기
+    try {
+        const response = await fetch('/channels.json');
+        if (response.ok) {
+            categoryData = await response.json();
+            saveToStorage();
+            console.log(`✅ channels.json에서 ${categoryData.categories.length}개 카테고리 로드됨`);
+        }
+    } catch (error) {
+        console.warn('channels.json 로드 실패:', error);
+        categoryData = { categories: [{ name: '기타', channels: [] }] };
     }
 }
 
-// localStorage에 채널 저장
-function saveChannelsToStorage() {
-    localStorage.setItem('kyoutube_channels', JSON.stringify(channels));
+// localStorage에 저장
+function saveToStorage() {
+    localStorage.setItem('kyoutube_category_data', JSON.stringify(categoryData));
 }
 
 // 이벤트 리스너 설정
@@ -53,28 +65,135 @@ function setupEventListeners() {
     
     // 엔터키로 검색
     document.getElementById('searchInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            searchChannels();
-        }
+        if (e.key === 'Enter') searchChannels();
     });
+
+    // 카테고리 추가 버튼
+    document.getElementById('addCategoryButton').addEventListener('click', addCategory);
 
     // 동영상 목록으로 돌아가기
     document.getElementById('backToVideos').addEventListener('click', () => {
         document.getElementById('playerSection').style.display = 'none';
         document.getElementById('videoSection').style.display = 'block';
-        
-        if (player && player.pauseVideo) {
-            player.pauseVideo();
-        }
-        
+        if (player && player.pauseVideo) player.pauseVideo();
         document.getElementById('videoSection').scrollIntoView({ behavior: 'smooth' });
     });
 }
 
+// 카테고리 셀렉트 채우기
+function populateCategorySelect() {
+    const select = document.getElementById('categorySelect');
+    select.innerHTML = '';
+    categoryData.categories.forEach((cat, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = cat.name;
+        select.appendChild(option);
+    });
+}
+
+// 카테고리 추가
+function addCategory() {
+    const input = document.getElementById('newCategoryInput');
+    const name = input.value.trim();
+    
+    if (!name) {
+        alert('카테고리 이름을 입력하세요.');
+        return;
+    }
+    
+    // 중복 체크
+    if (categoryData.categories.find(c => c.name === name)) {
+        alert('이미 존재하는 카테고리입니다.');
+        return;
+    }
+    
+    categoryData.categories.push({ name, channels: [] });
+    saveToStorage();
+    renderCategoryList();
+    populateCategorySelect();
+    input.value = '';
+    alert(`"${name}" 카테고리가 추가되었습니다.`);
+}
+
+// 카테고리 삭제
+function deleteCategory(categoryIndex, event) {
+    event.stopPropagation();
+    const cat = categoryData.categories[categoryIndex];
+    
+    if (!confirm(`"${cat.name}" 카테고리를 삭제하시겠습니까?\n(${cat.channels.length}개 채널이 함께 삭제됩니다)`)) {
+        return;
+    }
+    
+    categoryData.categories.splice(categoryIndex, 1);
+    saveToStorage();
+    renderCategoryList();
+    populateCategorySelect();
+}
+
+// 카테고리 목록 렌더링
+function renderCategoryList() {
+    const container = document.getElementById('categoryList');
+    container.innerHTML = '';
+
+    categoryData.categories.forEach((category, catIndex) => {
+        const catDiv = document.createElement('div');
+        catDiv.className = 'category-item';
+        
+        // 카테고리 헤더
+        const header = document.createElement('div');
+        header.className = 'category-header';
+        header.onclick = () => toggleCategory(catIndex);
+        
+        header.innerHTML = `
+            <span class="category-toggle">▶</span>
+            <span class="category-name">${category.name}</span>
+            <span class="category-count">(${category.channels.length})</span>
+            <button class="delete-category" onclick="deleteCategory(${catIndex}, event)">✕</button>
+        `;
+        
+        // 채널 목록 (기본 숨김)
+        const channelList = document.createElement('div');
+        channelList.className = 'category-channels';
+        channelList.id = `category-${catIndex}`;
+        channelList.style.display = 'none';
+        
+        category.channels.forEach((channel, chIndex) => {
+            const chDiv = document.createElement('div');
+            chDiv.className = 'channel-item';
+            chDiv.innerHTML = `
+                <span class="channel-name" onclick="selectChannel(${catIndex}, ${chIndex})">${channel.name}</span>
+                <button class="delete-channel" onclick="deleteChannel(${catIndex}, ${chIndex}, event)">✕</button>
+            `;
+            channelList.appendChild(chDiv);
+        });
+        
+        catDiv.appendChild(header);
+        catDiv.appendChild(channelList);
+        container.appendChild(catDiv);
+    });
+}
+
+// 카테고리 토글 (펼침/접힘)
+function toggleCategory(catIndex) {
+    const channelList = document.getElementById(`category-${catIndex}`);
+    const header = channelList.previousElementSibling;
+    const toggle = header.querySelector('.category-toggle');
+    
+    if (channelList.style.display === 'none') {
+        channelList.style.display = 'block';
+        toggle.textContent = '▼';
+        header.classList.add('open');
+    } else {
+        channelList.style.display = 'none';
+        toggle.textContent = '▶';
+        header.classList.remove('open');
+    }
+}
+
 // 채널 검색
 async function searchChannels() {
-    const searchInput = document.getElementById('searchInput');
-    const query = searchInput.value.trim();
+    const query = document.getElementById('searchInput').value.trim();
     
     if (!query) {
         alert('검색어를 입력하세요.');
@@ -99,7 +218,7 @@ async function searchChannels() {
             item.className = 'search-result-item';
             
             // 이미 추가된 채널인지 확인
-            const alreadyAdded = channels.find(ch => ch.channelId === channel.channelId);
+            const alreadyAdded = isChannelAdded(channel.channelId);
             
             item.innerHTML = `
                 <img src="${channel.thumbnail}" alt="${channel.title}" class="search-result-thumbnail">
@@ -121,87 +240,53 @@ async function searchChannels() {
     }
 }
 
+// 채널이 이미 추가되었는지 확인
+function isChannelAdded(channelId) {
+    return categoryData.categories.some(cat => 
+        cat.channels.some(ch => ch.id === channelId)
+    );
+}
+
 // 채널 추가
 function addChannel(name, channelId) {
-    // 중복 체크
-    const exists = channels.find(ch => ch.channelId === channelId);
-    if (exists) {
+    if (isChannelAdded(channelId)) {
         alert('이미 추가된 채널입니다.');
         return;
     }
 
-    // 새 ID 생성
-    const newId = channels.length > 0 ? Math.max(...channels.map(ch => ch.id)) + 1 : 1;
+    const categoryIndex = parseInt(document.getElementById('categorySelect').value);
     
-    const newChannel = {
-        id: newId,
-        name: name,
-        channelId: channelId
-    };
-
-    channels.push(newChannel);
-    saveChannelsToStorage();
-    renderChannelList();
+    categoryData.categories[categoryIndex].channels.push({
+        id: channelId,
+        name: name
+    });
     
-    // 검색 결과 초기화
+    saveToStorage();
+    renderCategoryList();
+    
     document.getElementById('searchResults').innerHTML = '';
     document.getElementById('searchInput').value = '';
     
-    alert(`${name} 채널이 추가되었습니다!`);
+    alert(`${name} 채널이 "${categoryData.categories[categoryIndex].name}"에 추가되었습니다!`);
 }
 
 // 채널 삭제
-function deleteChannel(channelId, event) {
+function deleteChannel(catIndex, chIndex, event) {
     event.stopPropagation();
     
-    const channel = channels.find(ch => ch.id === channelId);
+    const channel = categoryData.categories[catIndex].channels[chIndex];
     if (!confirm(`${channel.name} 채널을 삭제하시겠습니까?`)) {
         return;
     }
 
-    channels = channels.filter(ch => ch.id !== channelId);
-    saveChannelsToStorage();
-    renderChannelList();
-    
-    alert('채널이 삭제되었습니다.');
-}
-
-// 채널 목록 렌더링
-function renderChannelList() {
-    const channelList = document.getElementById('channelList');
-    channelList.innerHTML = '';
-
-    // 채널을 정렬하고 새 번호 부여
-    const sortedChannels = [...channels].sort((a, b) => a.id - b.id);
-    
-    sortedChannels.forEach((channel, index) => {
-        const displayNumber = index + 1; // 1부터 시작하는 연속된 번호
-        
-        const wrapper = document.createElement('div');
-        wrapper.className = 'channel-button-wrapper';
-        
-        const button = document.createElement('button');
-        button.className = 'channel-button';
-        button.onclick = () => selectChannel(channel);
-        
-        button.innerHTML = `
-            <span class="channel-number">${displayNumber}</span>
-            <span class="channel-name">${channel.name}</span>
-        `;
-        
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'delete-channel';
-        deleteBtn.innerHTML = '✕';
-        deleteBtn.onclick = (e) => deleteChannel(channel.id, e);
-        
-        wrapper.appendChild(button);
-        wrapper.appendChild(deleteBtn);
-        channelList.appendChild(wrapper);
-    });
+    categoryData.categories[catIndex].channels.splice(chIndex, 1);
+    saveToStorage();
+    renderCategoryList();
 }
 
 // 채널 선택
-async function selectChannel(channel) {
+async function selectChannel(catIndex, chIndex) {
+    const channel = categoryData.categories[catIndex].channels[chIndex];
     currentChannel = channel;
     
     document.getElementById('currentChannel').style.display = 'block';
@@ -212,10 +297,10 @@ async function selectChannel(channel) {
     document.getElementById('channelDescription').textContent = '동영상을 불러오는 중...';
     
     try {
-        const channelInfo = await fetchChannelInfo(channel.channelId);
+        const channelInfo = await fetchChannelInfo(channel.id);
         document.getElementById('channelDescription').textContent = channelInfo.description || '설명 없음';
         
-        await loadVideos(channel.channelId);
+        await loadVideos(channel.id);
         document.getElementById('videoSection').scrollIntoView({ behavior: 'smooth' });
     } catch (error) {
         console.error('Error selecting channel:', error);

@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "server.js",
+      "src": "api/**/*.js",
       "use": "@vercel/node"
     },
     {
@@ -12,15 +12,20 @@
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "server.js"
+      "src": "/api/channels/([^/]+)/videos",
+      "dest": "/api/channels/[channelId]/videos.js?channelId=$1"
+    },
+    {
+      "src": "/api/channels/([^/]+)/info",
+      "dest": "/api/channels/[channelId]/info.js?channelId=$1"
+    },
+    {
+      "src": "/api/search/channels",
+      "dest": "/api/search/channels.js"
     },
     {
       "src": "/(.*)",
-      "dest": "server.js"
+      "dest": "/public/$1"
     }
-  ],
-  "env": {
-    "YOUTUBE_API_KEY": "@youtube_api_key"
-  }
+  ]
 }
