@@ -3,6 +3,6 @@ node_modules/
 .DS_Store
 npm-debug.log
 *.log
-channels.json
+/channels.json
 .vercel
 .env*.local
